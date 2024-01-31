@@ -16,48 +16,34 @@ int offset[size][2]{ {-2, 1},
 void DeskPrint();
 
 int WeghtCalculate(int row, int col);
-int MinWeightIndex(int weights[], int size);
+int MinWeightIndex(int weights[]);
+bool IsDesk(int row, int col);
+
+void KniteBypass(int rowCurr, int colCurr);
 
 int main()
 {
-    int step{};
-    int rowCurr, colCurr;
+
+    /*int rowCurr, colCurr;
     std::cout << "Input row: ";
     std::cin >> rowCurr;
     std::cout << "Input column: ";
-    std::cin >> colCurr;
+    std::cin >> colCurr;*/
 
-    desk[rowCurr][colCurr] = ++step;
+    int count{};
 
-    while (step <= 63)
-    {
-        int variants[size][2]{};
-        int variantsWeight[size]{};
-        int variantsSize{};
-        
-        for (int i{}; i < size; i++)
+    for(int row{}; row < size; row++)
+        for (int col{}; col < size; col++)
         {
-            int offsetRow = rowCurr + offset[i][0];
-            int offsetCol = colCurr + offset[i][1];
+            std::cout << "----" << ++count << "----\n";
+            KniteBypass(row, col);
 
-            if (offsetRow >= 0 && offsetRow < size
-                && offsetCol >= 0 && offsetCol < size)
-            {
-                if (!desk[offsetRow][offsetCol])
-                {
-                    variantsWeight[i] = WeghtCalculate(offsetRow, offsetCol);
-                    variantsSize++;
-                }
-            }
+            for (int i{}; i < size; i++)
+                for (int j{}; j < size; j++)
+                    desk[i][j] = 0;
+
+            std::cout << "\n";
         }
-        int offsetMin = MinWeightIndex(variantsWeight, variantsSize);
-        
-        rowCurr += offset[offsetMin][0];
-        colCurr += offset[offsetMin][1];
-        desk[rowCurr][colCurr] = ++step;
-    }
-
-    DeskPrint();
     
 }
 
@@ -73,14 +59,80 @@ void DeskPrint()
 
 int WeghtCalculate(int row, int col)
 {
-    return 0;
+    int weight{};
+
+    for (int i{}; i < size; i++)
+    {
+        int offsetRow = row + offset[i][0];
+        int offsetCol = col + offset[i][1];
+
+        if (IsDesk(offsetRow, offsetCol))
+        {
+            if (!desk[offsetRow][offsetCol])
+                weight++;
+        }
+    }
+
+    return weight;
 }
 
-int MinWeightIndex(int weights[], int size)
+int MinWeightIndex(int weights[])
 {
-    int index{};
-    for (int i{ 1 }; i < size; i++)
-        if (weights[index] > weights[i])
+    int index;
+    for (index = 0; index < size; index++)
+        if (weights[index])
+            break;
+    
+    for (int i{ index + 1 }; i < size; i++)
+        if (weights[index] > weights[i] && weights[i] != 0)
             index = i;
     return index;
+}
+
+bool IsDesk(int row, int col)
+{
+    return row >= 0 && row < size && col >= 0 && col < size;
+}
+
+void KniteBypass(int rowCurr, int colCurr)
+{
+    int step{};
+    desk[rowCurr][colCurr] = ++step;
+
+    while (step < 63)
+    {
+        int variantsWeight[size]{};
+
+        for (int i{}; i < size; i++)
+        {
+            int offsetRow = rowCurr + offset[i][0];
+            int offsetCol = colCurr + offset[i][1];
+
+            if (IsDesk(offsetRow, offsetCol))
+            {
+                if (!desk[offsetRow][offsetCol])
+                    variantsWeight[i] = WeghtCalculate(offsetRow, offsetCol);
+            }
+        }
+        int offsetMin = MinWeightIndex(variantsWeight);
+
+        rowCurr += offset[offsetMin][0];
+        colCurr += offset[offsetMin][1];
+        desk[rowCurr][colCurr] = ++step;
+    }
+
+    for (int i{}; i < size; i++)
+    {
+        int offsetRow = rowCurr + offset[i][0];
+        int offsetCol = colCurr + offset[i][1];
+
+        if (IsDesk(offsetRow, offsetCol))
+            if (!desk[offsetRow][offsetCol])
+            {
+                desk[offsetRow][offsetCol] = 64;
+                break;
+            }
+    }
+
+    DeskPrint();
 }
